@@ -1,18 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser
-
-class User(AbstractBaseUser):
-    email = models.EmailField(unique=True)
-    full_name = models.CharField(max_length=100)
-    is_admin = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    USERNAME_FIELD = 'email'
-
-    def __str__(self):
-        return self.full_name
+from django.conf import settings
 
 class Internship(models.Model):
     title = models.CharField(max_length=100)
@@ -28,7 +15,7 @@ class Internship(models.Model):
         return self.title
 
 class Application(models.Model):
-    intern = models.ForeignKey(User, on_delete=models.CASCADE)
+    intern = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     internship = models.ForeignKey(Internship, on_delete=models.CASCADE)
     resume = models.FileField(upload_to='resumes/')
     cover_letter = models.TextField()
