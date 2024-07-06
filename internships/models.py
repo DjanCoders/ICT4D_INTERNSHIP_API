@@ -22,3 +22,21 @@ class Application(models.Model):
     applied_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, default='Pending')
     university = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f'Application by {self.intern.username} for {self.internship}'
+    
+
+class Question(models.Model):
+    question_text = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.question_text
+
+class Answer(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    application = models.ForeignKey(Application, related_name='answers', on_delete=models.CASCADE)
+    answer_text = models.TextField()
+
+    def __str__(self):
+        return f'{self.question} - {self.answer_text}'
