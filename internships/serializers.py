@@ -10,7 +10,7 @@ class InternshipSerializer(serializers.ModelSerializer):
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
-        fields = '__all__'
+        fields = ['question_text']
 
 class AnswerSerializer(serializers.ModelSerializer):
     question = QuestionSerializer()
@@ -36,3 +36,19 @@ class ApplicationSerializer(serializers.ModelSerializer):
             Answer.objects.create(question=question, application=application, **answer_data)
         
         return application
+    
+    def update(self, instance, validated_data):
+        answers_data = validated_data.pop('answers')
+        instance.internship = validated_data.get('internship', instance.internship)
+        instance.resume = validated_data.get('resume', instance.resume)
+        instance.cover_letter = validated_data.get('cover_letter', instance.cover_letter)
+        instance.status = validated_data.get('status', instance.status)
+        instance.university = validated_data.get('university', instance.university)
+        instance.save()
+
+        for answer_data in answers_data:
+            question_data = answer_data.pop('question')
+            question, created = Question.objects.get_or_create(**question_data)
+            Answer.objects.update_or_create(application=instance, question=question, defaults={'answer_text': answer_data['answer_text']})
+        
+        return instance
