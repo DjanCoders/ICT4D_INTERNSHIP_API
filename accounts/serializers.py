@@ -5,16 +5,15 @@ from .models import CustomUser, Profile
 class RegisterationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['email', 'username', 'password']
-        extra_kwargs = {
-            'password': {'write_only': True}
-        }
-    
+        fields = ('email', 'password', 'first_name', 'last_name')
+        extra_kwargs = {'password': {'write_only': True}}
+
     def create(self, validated_data):
         user = CustomUser.objects.create_user(
             email=validated_data['email'],
-            username=validated_data['username'],
-            password=validated_data['password']
+            password=validated_data['password'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name']
         )
         return user
 
