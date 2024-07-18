@@ -6,7 +6,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import CustomUser, Profile
 from .serializers import CustomUserSerializer, ProfileSerializer, RegisterationSerializer
-from .permissions import IsOwner
+from .permissions import IsOwner, IsAdminOrReadOnly
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
@@ -24,7 +24,7 @@ class RegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CustomUserViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminOrReadOnly]
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
 
