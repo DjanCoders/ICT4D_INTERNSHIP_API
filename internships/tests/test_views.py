@@ -1,17 +1,19 @@
-from rest_framework.test import APITestCase, APIClient
+from django.test import TestCase
+from rest_framework.test import APIClient
 from rest_framework import status
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 
-from .models import Internship, Question, Application, Answer
+from ..models import Internship, Question, Application, Answer
 
 User = get_user_model()
 
-class ApplyForInternshipTestCase():
+class ApplyForInternshipTestCase(TestCase):
     def setUp(self):
         # Create a user
-        self.user = User.objects.create_user(email='testuser@example.com', password='password123')
         self.client = APIClient()
+        self.user = User.objects.create_user(email='testuser@example.com', password='password123')
+        self.client.force_authenticate(user=self.user)
 
         # Create an internship
         self.internship = Internship.objects.create(
@@ -28,8 +30,7 @@ class ApplyForInternshipTestCase():
         self.question2 = Question.objects.create(question_text='Describe a project you have worked on.')
 
     def test_apply_for_internship(self):
-        self.authenticate()
-        url = reverse('application-list')
+        url = reverse('apply', kwargs={'pk': self.internship.id})
 
         data = {
             'internship': self.internship.id,
@@ -41,12 +42,13 @@ class ApplyForInternshipTestCase():
                     'question': self.question1.id, 'answer_text': 'I have used Python for 3 years.'
                 },
                 {
-                    'question': self.question.id, 'answer_text': 'I have worked on a web application using Django.'
+                    'question': self.question2.id, 'answer_text': 'I have worked on a web application using Django.'
                 },
             ]
         }
 
         response = self.client.post(url, data, format='json')
+        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Application.objects.count(), 1)
         self.assertEqual(Application.objects.get().student, self.user)
