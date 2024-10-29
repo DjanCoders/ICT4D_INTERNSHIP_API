@@ -2,12 +2,13 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import get_applicant_counts
 from .views import (InternshipViewSet #ApplicationViewSet,
-                     ,QuestionViewSet,InternshipApplicationView)
+                     ,MCQQuestionViewSet, DescriptiveQuestionViewSet,InternshipApplicationView)
 
 router = DefaultRouter()
 router.register('internships', InternshipViewSet)
 #router.register('applications', ApplicationViewSet)
-router.register('questions', QuestionViewSet)
+router.register('mcqquestions', MCQQuestionViewSet)
+router.register('shortanswerquestions', DescriptiveQuestionViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -2,9 +2,9 @@ from rest_framework import viewsets, generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import (InternshipSerializer, #ApplicationSerializer, Application,
-                          QuestionSerializer,InternshipApplicationSerializer)
-from .models import Internship,  Question,InternshipApplication
+from .serializers import InternshipSerializer, InternshipApplicationSerializer, MCQQuestionSerializer, DescriptiveQuestionSerializer
+from .models import MCQQuestion, DescQuestion
+from .models import Internship,  MCQQuestion,InternshipApplication
 from .permissions import IsAdminOrReadOnly
 from django.http import JsonResponse
 
@@ -20,10 +20,14 @@ class InternshipViewSet(viewsets.ModelViewSet):
 
     # def perform_create(self, serializer):
     #     serializer.save(intern=self.request.user)
+class MCQQuestionViewSet(viewsets.ModelViewSet):
+    queryset = MCQQuestion.objects.all()
+    serializer_class = MCQQuestionSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
-class QuestionViewSet(viewsets.ModelViewSet):
-    queryset = Question.objects.all()
-    serializer_class = QuestionSerializer
+class DescriptiveQuestionViewSet(viewsets.ModelViewSet):
+    queryset = DescQuestion.objects.all()
+    serializer_class = DescriptiveQuestionSerializer
     permission_classes = [IsAdminOrReadOnly]
 
 # class ApplyView(generics.GenericAPIView):

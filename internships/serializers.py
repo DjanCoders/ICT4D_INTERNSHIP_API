@@ -1,23 +1,40 @@
 from rest_framework import serializers
 
-from .models import Internship, Question, Answer,InternshipApplication
+from .models import Internship, Answer,InternshipApplication, MCQQuestion, DescQuestion, Option, Answer
 
 class InternshipSerializer(serializers.ModelSerializer):
     class Meta:
         model = Internship
         fields = '__all__'
 
-class QuestionSerializer(serializers.ModelSerializer):
+class OptionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Question
-        fields = ['question_text']
+        model = Option
+        fields = ['id', 'text', 'is_answer']
+
+class MCQQuestionSerializer(serializers.ModelSerializer):
+    options = OptionSerializer(many=True, required=False)
+
+    class Meta:
+        model = MCQQuestion
+        fields = ['id', 'text', 'question_type', 'options']
+
+    def create(self, validated_data):
+        options_data = validated_data.pop('options', [])
+        mcq_question = MCQQuestion.objects.create(**validated_data)
+        for option_data in options_data:
+            Option.objects.create(question=mcq_question, **option_data)
+        return mcq_question
+
+class DescriptiveQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DescQuestion
+        fields = ['id', 'text', 'short_answer']
 
 class AnswerSerializer(serializers.ModelSerializer):
-    question = QuestionSerializer()
-
     class Meta:
         model = Answer
-        fields = '__all__'
+        fields = ['id', 'mcq_answer', 'desc_answer', 'mcq_question', 'descriptive_question']
 
 # # class ApplicationSerializer(serializers.ModelSerializer):
 #     answers = AnswerSerializer(many=True)
