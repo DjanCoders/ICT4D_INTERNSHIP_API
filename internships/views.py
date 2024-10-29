@@ -12,6 +12,17 @@ class InternshipViewSet(viewsets.ModelViewSet):
     queryset = Internship.objects.all()
     serializer_class = InternshipSerializer
     # permission_classes = [IsAdminOrReadOnly]
+class InternshipStatusUpdateView(generics.UpdateAPIView):
+    queryset = Internship.objects.all()
+    serializer_class = InternshipSerializer
+
+    def patch(self, request, *args, **kwargs):
+        instance = self.get_object()
+        # Only update the status field
+        instance.is_active = request.data.get("is_active", instance.is_active)
+        instance.save()
+        return Response({"is_active": instance.is_active}, status=status.HTTP_200_OK) 
+
 
 # class ApplicationViewSet(viewsets.ModelViewSet):
 #     queryset = Application.objects.all()
@@ -25,6 +36,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
     permission_classes = [IsAdminOrReadOnly]
+
 
 # class ApplyView(generics.GenericAPIView):
 #     permission_classes = [IsAuthenticated]
