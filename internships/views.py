@@ -1,20 +1,22 @@
 from rest_framework import viewsets, generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
-from .serializers import InternshipSerializer, ApplicationSerializer, QuestionSerializer
-from .models import Internship, Application, Question
+from rest_framework.views import APIView
+from .serializers import (InternshipSerializer, ApplicationSerializer, 
+                          QuestionSerializer,InternshipApplicationSerializer)
+from .models import Internship, Application, Question,InternshipApplication
 from .permissions import IsAdminOrReadOnly
+from django.http import JsonResponse
 
 class InternshipViewSet(viewsets.ModelViewSet):
     queryset = Internship.objects.all()
     serializer_class = InternshipSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    # permission_classes = [IsAdminOrReadOnly]
 
 class ApplicationViewSet(viewsets.ModelViewSet):
     queryset = Application.objects.all()
     serializer_class = ApplicationSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         serializer.save(intern=self.request.user)
@@ -36,3 +38,24 @@ class ApplyView(generics.GenericAPIView):
             application = serializer.save(student=request.user, internhsip=internhsip)
             return Response(ApplicationSerializer(application).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class InternshipApplicationView(generics.ListCreateAPIView):
+   serializer_class = InternshipApplicationSerializer
+
+   def get_queryset(self):
+        queryset = InternshipApplication.objects.all()
+        status = self.request.query_params.get('status', None)
+        
+        # Filter by status if the status parameter is provided
+        if status:
+            queryset = queryset.filter(status=status)
+        
+        return queryset
+
+def get_applicant_counts(request):
+    data={
+        'totalApplicants': InternshipApplication.objects.count(),
+        'approvedApplicants': InternshipApplication.objects.filter(status='Approved').count(),
+        'pendingApplicants': InternshipApplication.objects.filter(status='Pending').count(),
+        'rejectedApplicants': InternshipApplication.objects.filter(status='Rejected').count(),
+    }
+    return JsonResponse(data)

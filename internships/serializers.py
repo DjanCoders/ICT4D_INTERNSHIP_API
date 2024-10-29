@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Internship, Application, Question, Answer
+from .models import Internship, Application, Question, Answer,InternshipApplication
 
 class InternshipSerializer(serializers.ModelSerializer):
     class Meta:
@@ -52,3 +52,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
             Answer.objects.update_or_create(application=instance, question=question, defaults={'answer_text': answer_data['answer_text']})
         
         return instance
+class InternshipApplicationSerializer(serializers.ModelSerializer):
+    class Meta:
+         model=InternshipApplication
+         fields='__all__'
