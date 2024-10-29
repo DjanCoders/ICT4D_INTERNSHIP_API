@@ -18,8 +18,8 @@ class InternshipViewSet(viewsets.ModelViewSet):
 #     serializer_class = ApplicationSerializer
 #     # permission_classes = [IsAuthenticated]
 
-    def perform_create(self, serializer):
-        serializer.save(intern=self.request.user)
+    # def perform_create(self, serializer):
+    #     serializer.save(intern=self.request.user)
 
 class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.all()
