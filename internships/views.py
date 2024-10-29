@@ -54,6 +54,16 @@ class InternshipApplicationView(generics.ListCreateAPIView):
             queryset = queryset.filter(status=status)
         
         return queryset
+class InternshipApplicationStatusUpdateView(generics.UpdateAPIView):
+    queryset = InternshipApplication.objects.all()
+    serializer_class = InternshipApplicationSerializer
+
+    def patch(self, request, *args, **kwargs):
+        instance = self.get_object()
+        # Only update the status field
+        instance.status = request.data.get("status", instance.status)
+        instance.save()
+        return Response({"status": instance.status}, status=status.HTTP_200_OK)   
 
 def get_applicant_counts(request):
     data={
