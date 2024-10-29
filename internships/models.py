@@ -37,19 +37,6 @@ class InternshipApplication(models.Model):
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.department}"    
 
-
-
-class Application(models.Model):
-    intern = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    internship = models.ForeignKey(Internship, on_delete=models.CASCADE)
-    resume = models.FileField(upload_to='resumes/')
-    cover_letter = models.FileField(upload_to='cover_letter/')
-    applied_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, default='Pending')
-    university = models.CharField(max_length=100)
-
-    def __str__(self):
-        return f'Application by {self.intern.username} for {self.internship}'
     
 
 class Question(models.Model):
@@ -60,7 +47,7 @@ class Question(models.Model):
 
 class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    application = models.ForeignKey(Application, related_name='answers', on_delete=models.CASCADE)
+  #  application = models.ForeignKey(Application, related_name='answers', on_delete=models.CASCADE)
     answer_text = models.TextField()
 
     def __str__(self):
