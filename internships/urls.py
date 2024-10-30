@@ -2,16 +2,19 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import get_applicant_counts
 from .views import (InternshipViewSet #ApplicationViewSet,
-                     ,QuestionViewSet,InternshipApplicationView,
+                    ,InternshipApplicationView,
                      InternshipApplicationStatusUpdateView,
-                     InternshipStatusUpdateView
-                     
+                     InternshipStatusUpdateView,MCQQuestionViewSet,
+                     DescriptiveQuestionViewSet,
+                     MonthlyApplicationCountView,
+                     UnreadNotificationsView
                      )
 
 router = DefaultRouter()
 router.register('internships', InternshipViewSet)
 #router.register('applications', ApplicationViewSet)
-router.register('questions', QuestionViewSet)
+router.register('mcqquestions', MCQQuestionViewSet)
+router.register('shortanswerquestions', DescriptiveQuestionViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -20,6 +23,7 @@ urlpatterns = [
     path('applicant_counts/',get_applicant_counts,name="applicant-counts"),
     path('internship-applications/<int:pk>/status/', InternshipApplicationStatusUpdateView.as_view(), name='internship-status-update'),
     path('internships/<int:pk>/status/', InternshipStatusUpdateView.as_view(), name='internship-status-update'),
-
-
+    path('monthly-application-count/', MonthlyApplicationCountView.as_view(), name='monthly_application_count'),
+    path('notifications/',UnreadNotificationsView.as_view(),name="notifications"),
+     
 ]

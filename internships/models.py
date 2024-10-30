@@ -38,17 +38,60 @@ class InternshipApplication(models.Model):
         return f"{self.first_name} {self.last_name} - {self.department}"    
 
     
+class BaseQuestion(models.Model):
+    QUESTION_TYPES = [
+        ('MCQ', 'Multiple Choice Question'),
+        ('DESC', 'Descriptive Question'),
+    ]
 
-class Question(models.Model):
-    question_text = models.CharField(max_length=255)
+    text = models.TextField()
+    question_type = models.CharField(max_length=4, choices=QUESTION_TYPES)
+
+    class Meta:
+        abstract = True
+
+class MCQQuestion(BaseQuestion):
+    def __str__(self):
+        return f"MCQ: {self.text}"
+
+class DescQuestion(BaseQuestion):
+    short_answer = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
-        return self.question_text
+        return f"Descriptive: {self.text}"
+
+class Option(models.Model):
+    question = models.ForeignKey(MCQQuestion, related_name='options', on_delete=models.CASCADE)
+    text = models.CharField(max_length=255)
+    is_answer = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.text
 
 class Answer(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
-  #  application = models.ForeignKey(Application, related_name='answers', on_delete=models.CASCADE)
-    answer_text = models.TextField()
+    mcq_answer = models.ForeignKey(Option, on_delete=models.CASCADE, blank=True, null=True)
+    desc_answer = models.TextField(blank=True, null=True)
+    mcq_question = models.ForeignKey(MCQQuestion, null=True, blank=True, on_delete=models.CASCADE)
+    descriptive_question = models.ForeignKey(DescQuestion, null=True, blank=True, on_delete=models.CASCADE)
 
+    REVIEW_STATUS_CHOICES = [
+        ('PENDING', 'Pending Review'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+    ]
+    review_status = models.CharField(max_length=10, choices=REVIEW_STATUS_CHOICES, default='PENDING')
+    admin_feedback = models.TextField(blank=True, null=True)
+
+    def is_correct(self):
+        if isinstance(self.question, MCQQuestion) and self.mcq_answer:
+            return self.mcq_answer.is_answer
+        elif isinstance(self.question, DescQuestion):
+            # Skip automatic correctness check; to be reviewed by admin
+            return None  
+        return False
+class Notification(models.Model):
+    message=models.CharField(max_length=255)
+    is_read=models.BooleanField(default=False)
+    created_at=models.DateTimeField(auto_now_add=True)
     def __str__(self):
-        return f'{self.question} - {self.answer_text}'
+        return  self.message   
