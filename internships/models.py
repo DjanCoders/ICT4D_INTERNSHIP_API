@@ -35,7 +35,7 @@ class InternshipApplication(models.Model):
     status = models.CharField(max_length=20, default='Pending')
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} - {self.department}"    
+        return f"{self.first_name} {self.last_name}"    
 
     
 class BaseQuestion(models.Model):
@@ -89,6 +89,7 @@ class Answer(models.Model):
             # Skip automatic correctness check; to be reviewed by admin
             return None  
         return False
+    
 class Notification(models.Model):
     message=models.CharField(max_length=255)
     is_read=models.BooleanField(default=False)

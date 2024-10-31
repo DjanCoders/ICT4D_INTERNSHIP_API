@@ -2,10 +2,13 @@ from rest_framework import viewsets, generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import InternshipSerializer, InternshipApplicationSerializer, MCQQuestionSerializer, DescriptiveQuestionSerializer
+from .serializers import (InternshipSerializer,
+                           InternshipApplicationSerializer,
+                             MCQQuestionSerializer, 
+                          DescriptiveQuestionSerializer,AnswerSerializer)
 from .models import( Internship, MCQQuestion, 
                     MCQQuestion,InternshipApplication,
-                    Notification,DescQuestion)
+                    Notification,DescQuestion,Answer)
 from .permissions import IsAdminOrReadOnly
 from django.http import JsonResponse
 from django.db.models import Count
@@ -28,14 +31,6 @@ class InternshipStatusUpdateView(generics.UpdateAPIView):
         instance.save()
         return Response({"is_active": instance.is_active}, status=status.HTTP_200_OK) 
 
-
-# class ApplicationViewSet(viewsets.ModelViewSet):
-#     queryset = Application.objects.all()
-#     serializer_class = ApplicationSerializer
-#     # permission_classes = [IsAuthenticated]
-
-    # def perform_create(self, serializer):
-    #     serializer.save(intern=self.request.user)
 class MCQQuestionViewSet(viewsets.ModelViewSet):
     queryset = MCQQuestion.objects.all()
     serializer_class = MCQQuestionSerializer
@@ -47,18 +42,7 @@ class DescriptiveQuestionViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
 
 
-# class ApplyView(generics.GenericAPIView):
-#     permission_classes = [IsAuthenticated]
-#     serializer_class = ApplicationSerializer
 
-#     def post(self, request, pk):
-#         internhsip = Internship.objects.get(pk=pk)
-#         serializer = self.get_serializer(data=request.data)
-        
-#         if serializer.is_valid():
-#             application = serializer.save(student=request.user, internhsip=internhsip)
-#             return Response(ApplicationSerializer(application).data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 class InternshipApplicationView(viewsets.ModelViewSet):
    serializer_class = InternshipApplicationSerializer
    queryset = InternshipApplication.objects.all()
@@ -148,3 +132,48 @@ class UnreadNotificationsView(APIView):
         Notification.objects.filter(is_read=False).update(is_read=True)
         return Response({"id":1,"message": "Notifications marked as read."}, status=status.HTTP_200_OK)
     
+class GetQuestionsAPIView(APIView):
+    def get(self, request):
+        mcq_questions = MCQQuestion.objects.all()
+        desc_questions = DescQuestion.objects.all()
+
+        mcq_serializer = MCQQuestionSerializer(mcq_questions, many=True)
+        desc_serializer = DescriptiveQuestionSerializer(desc_questions, many=True)
+       
+
+
+        return Response({
+            "mcq_questions": mcq_serializer.data,
+            "desc_questions": desc_serializer.data,
+        }, status=status.HTTP_200_OK)
+        
+class SubmitAnswersAPIView(APIView):
+    def post(self, request):
+        answers_data = request.data
+        
+        # Iterate through each answer submitted
+        for answer_data in answers_data:
+            mcq_question_id = answer_data.get('mcq_question')
+            descriptive_question_id = answer_data.get('descriptive_question')
+
+            # Check if an answer already exists for the given questions
+            existing_answer = Answer.objects.filter(
+                mcq_question__id=mcq_question_id,
+                descriptive_question__id=descriptive_question_id
+            ).first()
+            
+            # Prepare the answer data
+            if existing_answer:
+                # Update existing answer
+                existing_answer.mcq_answer_id = answer_data.get('mcq_answer')
+                existing_answer.desc_answer = answer_data.get('desc_answer')
+                existing_answer.save()
+            else:
+                # Create a new answer
+                serializer = AnswerSerializer(data=answer_data)
+                if serializer.is_valid():
+                    serializer.save()
+                else:
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"message": "Answers submitted successfully!"}, status=status.HTTP_201_CREATED)

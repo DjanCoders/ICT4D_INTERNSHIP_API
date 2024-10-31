@@ -7,7 +7,9 @@ from .views import (InternshipViewSet #ApplicationViewSet,
                      InternshipStatusUpdateView,MCQQuestionViewSet,
                      DescriptiveQuestionViewSet,
                      MonthlyApplicationCountView,
-                     UnreadNotificationsView
+                     UnreadNotificationsView,
+                     GetQuestionsAPIView,
+                     SubmitAnswersAPIView,
                      )
 
 router = DefaultRouter()
@@ -25,5 +27,8 @@ urlpatterns = [
     path('internships/<int:pk>/status/', InternshipStatusUpdateView.as_view(), name='internship-status-update'),
     path('monthly-application-count/', MonthlyApplicationCountView.as_view(), name='monthly_application_count'),
     path('notifications/',UnreadNotificationsView.as_view(),name="notifications"),
+    path('get-questions/',GetQuestionsAPIView.as_view(), name="get-questions"),
+    path('submit-answers/',SubmitAnswersAPIView.as_view(), name="submit-answers")
+
      
 ]
