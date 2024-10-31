@@ -59,7 +59,7 @@ class DescriptiveQuestionViewSet(viewsets.ModelViewSet):
 #             application = serializer.save(student=request.user, internhsip=internhsip)
 #             return Response(ApplicationSerializer(application).data, status=status.HTTP_201_CREATED)
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-class InternshipApplicationView(generics.ListCreateAPIView):
+class InternshipApplicationView(viewsets.ModelViewSet):
    serializer_class = InternshipApplicationSerializer
    queryset = InternshipApplication.objects.all()
 
@@ -67,21 +67,27 @@ class InternshipApplicationView(generics.ListCreateAPIView):
    def get_queryset(self):
         queryset = super().get_queryset()
 
-        status = self.request.query_params.get('status', None)
+        status_parm = self.request.query_params.get('status', None)
         
         # Filter by status if the status parameter is provided
-        if status:
-            queryset = queryset.filter(status=status)
+        if status_parm:
+            queryset = queryset.filter(status=status_parm)
         
         return queryset
    def create(self, request, *args, **kwargs):
         email = request.data.get('email')  # Extract the email from the request data
+        apply_for_id = request.data.get('applly_for')
         if not email:
             return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
-
+        if not apply_for_id:
+           return Response({"error": "applly_for field is required"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            apply_for_instance=Internship.objects.get(id=apply_for_id)
+        except Internship.DoesNotExist:
+            Response({"error": "Invalid internship selection"}, status=status.HTTP_400_BAD_REQUEST)   
         # Check if an application with this email already exists
         try:
-            existing_application = InternshipApplication.objects.get(email=email)
+            existing_application = InternshipApplication.objects.get(email=email, applly_for=apply_for_instance)
             serializer = self.get_serializer(existing_application, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()  # Update the existing application
