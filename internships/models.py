@@ -27,7 +27,7 @@ class InternshipApplication(models.Model):
     gpa = models.DecimalField(max_digits=4, decimal_places=2)
     start_date = models.DateField()
     duration = models.IntegerField()  # Duration in months
-    department = models.CharField(max_length=100)
+    # department = models.CharField(max_length=100)
     resume = models.FileField(upload_to='resumes/',blank=True, null=True)
     cover_letter = models.FileField(upload_to='cover_letters/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

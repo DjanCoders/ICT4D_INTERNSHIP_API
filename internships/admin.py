@@ -5,7 +5,7 @@ admin.site.register(Notification)
 admin.site.register(Internship)
 class InternshipApplicationAdmin(admin.ModelAdmin):
     model=InternshipApplication
-    list_display=['first_name','last_name','email']
+    list_display=['first_name','last_name','email','applly_for']
 class OptionInline(admin.TabularInline):
     model = Option
     extra = 1  # Number of empty forms to display

@@ -70,6 +70,9 @@ class AnswerSerializer(serializers.ModelSerializer):
         
 #         return instance
 class InternshipApplicationSerializer(serializers.ModelSerializer):
+    internship_title = serializers.ReadOnlyField(source='applly_for.title')
+
     class Meta:
          model=InternshipApplication
          fields='__all__'
+         extra_fields = ['internship_title']
