@@ -200,3 +200,14 @@ class SubmitAnswersAPIView(APIView):
                     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"message": "Answers submitted successfully!"}, status=status.HTTP_201_CREATED)
+class AnswerListView(APIView):
+    permission_classes = [IsAdminOrReadOnly]  # Restrict access to admin users
+
+    def get(self, request):
+        # Fetch all answers, including related applicant, question, and options if available
+        answers = Answer.objects.select_related('applicant', 'mcq_question', 'descriptive_question', 'mcq_answer').all()
+        
+        # Serialize the data to send as JSON
+        serializer = AnswerSerializer(answers, many=True)
+        
+        return Response(serializer.data)

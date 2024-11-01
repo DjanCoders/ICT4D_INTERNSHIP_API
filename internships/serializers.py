@@ -34,10 +34,22 @@ class DescriptiveQuestionSerializer(serializers.ModelSerializer):
         fields = ['id', 'text', 'short_answer',]
 
 class AnswerSerializer(serializers.ModelSerializer):
+    applicant_name = serializers.CharField(source='applicant.username', read_only=True)
+    mcq_question_text = serializers.CharField(source='mcq_question.text', read_only=True)
+    desc_question_text = serializers.CharField(source='descriptive_question.text', read_only=True)
+    mcq_answer_text = serializers.CharField(source='mcq_answer.text', read_only=True)
     class Meta:
         model = Answer
-        fields = ['id', 'applicant','mcq_answer', 'desc_answer', 'mcq_question', 'descriptive_question']
-
+        fields = [
+             'id', 
+            'applicant_name', 
+            'mcq_question_text', 
+            'desc_question_text', 
+            'mcq_answer_text', 
+            'desc_answer', 
+            'review_status', 
+            'admin_feedback'
+        ]
 
  
 class InternshipApplicationSerializer(serializers.ModelSerializer):

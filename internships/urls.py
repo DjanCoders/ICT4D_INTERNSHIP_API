@@ -10,6 +10,7 @@ from .views import (InternshipViewSet #ApplicationViewSet,
                      UnreadNotificationsView,
                      GetQuestionsAPIView,
                      SubmitAnswersAPIView,
+                     AnswerListView,
                      )
 
 router = DefaultRouter()
@@ -28,7 +29,10 @@ urlpatterns = [
     path('monthly-application-count/', MonthlyApplicationCountView.as_view(), name='monthly_application_count'),
     path('notifications/',UnreadNotificationsView.as_view(),name="notifications"),
     path('get-questions/',GetQuestionsAPIView.as_view(), name="get-questions"),
-    path('submit-answers/',SubmitAnswersAPIView.as_view(), name="submit-answers")
+    path('submit-answers/',SubmitAnswersAPIView.as_view(), name="submit-answers"),
+    path('review-answers/', AnswerListView.as_view(), name='review-answers'),
+
+
 
      
 ]
