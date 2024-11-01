@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from accounts.models import CustomUser
 
 class Internship(models.Model):
     title = models.CharField(max_length=100)
@@ -15,6 +16,7 @@ class Internship(models.Model):
         return self.title
 
 class InternshipApplication(models.Model):
+    applicant=models.ForeignKey(CustomUser,on_delete=models.CASCADE,related_name='application',null=True,blank=True)
     applly_for=models.ForeignKey(Internship,related_name='internship',on_delete=models.CASCADE,blank=True,null=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
@@ -27,7 +29,6 @@ class InternshipApplication(models.Model):
     gpa = models.DecimalField(max_digits=4, decimal_places=2)
     start_date = models.DateField()
     duration = models.IntegerField()  # Duration in months
-    # department = models.CharField(max_length=100)
     resume = models.FileField(upload_to='resumes/',blank=True, null=True)
     cover_letter = models.FileField(upload_to='cover_letters/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -51,11 +52,15 @@ class BaseQuestion(models.Model):
         abstract = True
 
 class MCQQuestion(BaseQuestion):
+    category=models.ForeignKey(Internship,related_name='mcq_questions',on_delete=models.CASCADE, blank=True, null=True)
+
     def __str__(self):
         return f"MCQ: {self.text}"
 
 class DescQuestion(BaseQuestion):
     short_answer = models.CharField(max_length=255, blank=True, null=True)
+    category=models.ForeignKey(Internship,related_name='desc_questions',on_delete=models.CASCADE, blank=True, null=True)
+
 
     def __str__(self):
         return f"Descriptive: {self.text}"
@@ -69,6 +74,7 @@ class Option(models.Model):
         return self.text
 
 class Answer(models.Model):
+    applicant = models.ForeignKey(CustomUser, on_delete=models.CASCADE,related_name="answers",blank=True, null=True)  
     mcq_answer = models.ForeignKey(Option, on_delete=models.CASCADE, blank=True, null=True)
     desc_answer = models.TextField(blank=True, null=True)
     mcq_question = models.ForeignKey(MCQQuestion, null=True, blank=True, on_delete=models.CASCADE)

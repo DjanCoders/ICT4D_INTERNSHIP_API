@@ -19,7 +19,7 @@ import calendar
 class InternshipViewSet(viewsets.ModelViewSet):
     queryset = Internship.objects.all()
     serializer_class = InternshipSerializer
-    # permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 class InternshipStatusUpdateView(generics.UpdateAPIView):
     queryset = Internship.objects.all()
     serializer_class = InternshipSerializer
@@ -42,45 +42,47 @@ class DescriptiveQuestionViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
 
 
-
 class InternshipApplicationView(viewsets.ModelViewSet):
-   serializer_class = InternshipApplicationSerializer
-   queryset = InternshipApplication.objects.all()
+    serializer_class = InternshipApplicationSerializer
+    queryset = InternshipApplication.objects.all()
+    permission_classes = [IsAuthenticated]  # Ensure only logged-in users can create applications
 
-
-   def get_queryset(self):
+    def get_queryset(self):
         queryset = super().get_queryset()
-
-        status_parm = self.request.query_params.get('status', None)
-        
-        # Filter by status if the status parameter is provided
-        if status_parm:
-            queryset = queryset.filter(status=status_parm)
-        
+        status_param = self.request.query_params.get('status')
+        if status_param:
+            queryset = queryset.filter(status=status_param)
         return queryset
-   def create(self, request, *args, **kwargs):
-        email = request.data.get('email')  # Extract the email from the request data
+
+    def create(self, request, *args, **kwargs):
+        email = request.data.get('email')
         apply_for_id = request.data.get('applly_for')
+
         if not email:
             return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
         if not apply_for_id:
-           return Response({"error": "applly_for field is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "applly_for field is required"}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
-            apply_for_instance=Internship.objects.get(id=apply_for_id)
+            apply_for_instance = Internship.objects.get(id=apply_for_id)
         except Internship.DoesNotExist:
-            Response({"error": "Invalid internship selection"}, status=status.HTTP_400_BAD_REQUEST)   
-        # Check if an application with this email already exists
+            return Response({"error": "Invalid internship selection"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if an application with this email and internship already exists for this user
+        user = request.user
         try:
-            existing_application = InternshipApplication.objects.get(email=email, applly_for=apply_for_instance)
+            existing_application = InternshipApplication.objects.get(
+                email=email, applly_for=apply_for_instance, applicant=user
+            )
             serializer = self.get_serializer(existing_application, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
-            serializer.save()  # Update the existing application
+            serializer.save()
             return Response({"message": "Application updated successfully!"}, status=status.HTTP_200_OK)
         except InternshipApplication.DoesNotExist:
-            # If no application exists with this email, create a new one
+            # Create a new application
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            serializer.save()  # Create a new application
+            serializer.save(applicant=user)
             return Response({"message": "Application submitted successfully!"}, status=status.HTTP_201_CREATED)
 class MonthlyApplicationCountView(APIView):
     
@@ -133,24 +135,43 @@ class UnreadNotificationsView(APIView):
         return Response({"id":1,"message": "Notifications marked as read."}, status=status.HTTP_200_OK)
     
 class GetQuestionsAPIView(APIView):
-    def get(self, request):
-        mcq_questions = MCQQuestion.objects.all()
-        desc_questions = DescQuestion.objects.all()
+    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access
 
-        mcq_serializer = MCQQuestionSerializer(mcq_questions, many=True)
-        desc_serializer = DescriptiveQuestionSerializer(desc_questions, many=True)
+    def get(self, request):
+        data = []
+
+        # Ensure we are retrieving the full Internship objects, not just IDs
+        applied_categories = Internship.objects.filter(
+            internship__applicant=request.user
+        ).distinct()
+
+        # Loop through each category to get associated questions
+        for category in applied_categories:
+            
+
+            mcq_questions = MCQQuestion.objects.filter(category=category)
+            desc_questions = DescQuestion.objects.filter(category=category)
+
+            mcq_serializer = MCQQuestionSerializer(mcq_questions, many=True)
+
+            desc_serializer = DescriptiveQuestionSerializer(desc_questions, many=True)
+
+            # Add category information along with questions
+            data.append({
+                "category_name": category.title,  # Ensure category.title is available
+                "mcq_questions": mcq_serializer.data,
+                "desc_questions": desc_serializer.data,
+            })
+        return Response(data)
        
 
 
-        return Response({
-            "mcq_questions": mcq_serializer.data,
-            "desc_questions": desc_serializer.data,
-        }, status=status.HTTP_200_OK)
+      
         
 class SubmitAnswersAPIView(APIView):
     def post(self, request):
         answers_data = request.data
-        
+        user=request.user
         # Iterate through each answer submitted
         for answer_data in answers_data:
             mcq_question_id = answer_data.get('mcq_question')
@@ -159,7 +180,8 @@ class SubmitAnswersAPIView(APIView):
             # Check if an answer already exists for the given questions
             existing_answer = Answer.objects.filter(
                 mcq_question__id=mcq_question_id,
-                descriptive_question__id=descriptive_question_id
+                descriptive_question__id=descriptive_question_id,
+                applicant=user
             ).first()
             
             # Prepare the answer data
@@ -171,8 +193,9 @@ class SubmitAnswersAPIView(APIView):
             else:
                 # Create a new answer
                 serializer = AnswerSerializer(data=answer_data)
+                
                 if serializer.is_valid():
-                    serializer.save()
+                   serializer.save(applicant=user)
                 else:
                     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
