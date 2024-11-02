@@ -18,7 +18,7 @@ class DescriptiveQuestionAdmin(admin.ModelAdmin):
     list_display = ('text', 'short_answer')
 
 class AnswerAdmin(admin.ModelAdmin):
-    list_display = ('mcq_answer', 'desc_answer', 'mcq_question', 'descriptive_question','applicant')
+    list_display = ('id','mcq_answer', 'desc_answer', 'mcq_question', 'descriptive_question','applicant','review_status','admin_feedback')
     search_fields = ('desc_answer',)
 
 admin.site.register(MCQQuestion, MCQQuestionAdmin)

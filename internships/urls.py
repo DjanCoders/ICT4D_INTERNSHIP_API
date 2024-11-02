@@ -31,6 +31,8 @@ urlpatterns = [
     path('get-questions/',GetQuestionsAPIView.as_view(), name="get-questions"),
     path('submit-answers/',SubmitAnswersAPIView.as_view(), name="submit-answers"),
     path('review-answers/', AnswerListView.as_view(), name='review-answers'),
+    path('review-answers/<int:pk>/', AnswerListView.as_view(), name='answer-detail'),
+
 
 
 

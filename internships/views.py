@@ -15,6 +15,7 @@ from django.db.models import Count
 from django.db.models.functions import TruncMonth
 from datetime import datetime
 import calendar
+from rest_framework.permissions import AllowAny
 
 class InternshipViewSet(viewsets.ModelViewSet):
     queryset = Internship.objects.all()
@@ -211,3 +212,27 @@ class AnswerListView(APIView):
         serializer = AnswerSerializer(answers, many=True)
         
         return Response(serializer.data)
+    def patch(self, request, pk):
+        try:
+            # Retrieve the answer by primary key
+            answer = Answer.objects.get(pk=pk)
+        except Answer.DoesNotExist:
+            return Response({'error': 'Answer not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if the request data contains the review status
+        status_data = request.data.get('review_status', None)
+        if status_data:
+            answer.review_status = status_data  # Update the review status
+
+        # Optionally, you can include admin feedback if provided
+        feedback_data = request.data.get('admin_feedback', None)
+        if feedback_data:
+            answer.admin_feedback = feedback_data  # Update admin feedback
+        
+        # Save the updated answer
+        answer.save()
+
+        # Serialize the updated answer
+        serializer = AnswerSerializer(answer)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
