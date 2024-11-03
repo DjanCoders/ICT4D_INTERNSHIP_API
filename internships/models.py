@@ -74,26 +74,24 @@ class Option(models.Model):
         return self.text
 
 class Answer(models.Model):
-    applicant = models.ForeignKey(CustomUser, on_delete=models.CASCADE,related_name="answers",blank=True, null=True)  
-    mcq_answer = models.ForeignKey(Option, on_delete=models.CASCADE, blank=True, null=True)
-    desc_answer = models.TextField(blank=True, null=True)
-    mcq_question = models.ForeignKey(MCQQuestion, null=True, blank=True, on_delete=models.CASCADE)
-    descriptive_question = models.ForeignKey(DescQuestion, null=True, blank=True, on_delete=models.CASCADE)
-
     REVIEW_STATUS_CHOICES = [
         ('PENDING', 'Pending Review'),
         ('APPROVED', 'Approved'),
         ('REJECTED', 'Rejected'),
     ]
+    applicant = models.ForeignKey(CustomUser, on_delete=models.CASCADE,related_name="answers",blank=True, null=True)  
+    mcq_answer = models.ForeignKey(Option, on_delete=models.CASCADE, blank=True, null=True)
+    desc_answer = models.TextField(blank=True, null=True)
+    mcq_question = models.ForeignKey(MCQQuestion, null=True, blank=True, on_delete=models.CASCADE)
+    descriptive_question = models.ForeignKey(DescQuestion, null=True, blank=True, on_delete=models.CASCADE)
     review_status = models.CharField(max_length=10, choices=REVIEW_STATUS_CHOICES, default='PENDING')
     admin_feedback = models.TextField(blank=True, null=True)
 
     def is_correct(self):
-        if isinstance(self.question, MCQQuestion) and self.mcq_answer:
-            return self.mcq_answer.is_answer
-        elif isinstance(self.question, DescQuestion):
-            # Skip automatic correctness check; to be reviewed by admin
-            return None  
+        if self.mcq_question and self.mcq_answer:
+            return self.mcq_answer.is_answer  # Returns True if mcq_answer is correct
+        elif self.descriptive_question:
+            return None  # Descriptive answers do not have automatic correctness
         return False
     
 class Notification(models.Model):

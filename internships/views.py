@@ -16,6 +16,7 @@ from django.db.models.functions import TruncMonth
 from datetime import datetime
 import calendar
 from rest_framework.permissions import AllowAny
+from accounts.models import Profile
 
 class InternshipViewSet(viewsets.ModelViewSet):
     queryset = Internship.objects.all()
@@ -72,15 +73,24 @@ class InternshipApplicationView(viewsets.ModelViewSet):
         # Check if an application with this email and internship already exists for this user
         user = request.user
         try:
+           
             existing_application = InternshipApplication.objects.get(
                 email=email, applly_for=apply_for_instance, applicant=user
             )
             serializer = self.get_serializer(existing_application, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
+            profile=Profile.objects.get(user=user)
+            profile.is_internee=True
+            profile.save()
             return Response({"message": "Application updated successfully!"}, status=status.HTTP_200_OK)
         except InternshipApplication.DoesNotExist:
             # Create a new application
+            profile=Profile.objects.get(user=user)
+            if not profile:
+                return Response({"message": "User Profle Does not exist!"}, status=status.HTTP_404_NOT_FOUND)
+            profile.is_internee=True
+            profile.save()
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save(applicant=user)
@@ -172,7 +182,6 @@ class GetQuestionsAPIView(APIView):
 class SubmitAnswersAPIView(APIView):
     def post(self, request):
         answers_data = request.data
-        print(answers_data)
         user=request.user
         # Iterate through each answer submitted
         for answer_data in answers_data:
