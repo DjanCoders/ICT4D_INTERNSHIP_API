@@ -18,7 +18,7 @@ class MCQQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MCQQuestion
-        fields = ['id', 'text', 'question_type', 'options',]
+        fields = ['id', 'text', 'question_type', 'options', 'category']
 
     def create(self, validated_data):
         options_data = validated_data.pop('options', [])
@@ -31,7 +31,7 @@ class DescriptiveQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DescQuestion
-        fields = ['id', 'text', 'short_answer',]
+        fields = ['id', 'text', 'short_answer', 'question_type', 'category']
 
 class AnswerSerializer(serializers.ModelSerializer):
     applicant_name = serializers.CharField(source='applicant.username', read_only=True)
@@ -42,11 +42,13 @@ class AnswerSerializer(serializers.ModelSerializer):
         model = Answer
         fields = [
              'id', 
-            'applicant_name', 
-            'mcq_question_text', 
+            'applicant_name',
+            'mcq_question', 
+            'mcq_question_text',
+            'descriptive_question',
             'desc_question_text', 
-            'mcq_answer_text', 
-            'desc_answer', 
+            'desc_answer',
+            'mcq_answer_text',  
             'review_status', 
             'admin_feedback'
         ]
