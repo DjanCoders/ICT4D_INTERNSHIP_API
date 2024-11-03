@@ -1,10 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
+from django.core import validators
 from .managers import CustomUserManager
 
 class CustomUser(AbstractUser):
-    email = models.EmailField(verbose_name='Email address', max_length=255, unique=True)
+    email = models.EmailField(verbose_name='Email address', max_length=255, 
+                              unique=True,validators=[validators.validate_email])
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ('username',)

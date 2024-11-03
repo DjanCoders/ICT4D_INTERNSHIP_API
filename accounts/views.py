@@ -4,9 +4,14 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import CustomUser, Profile
-from .serializers import CustomUserSerializer, ProfileSerializer, RegisterationSerializer
+from .models import Profile
+from .serializers import CustomUserSerializer, ProfileSerializer, RegisterationSerializer,ResetPasswordSerializer
 from .permissions import IsOwner, IsAdminOrReadOnly
+from django.contrib.auth.hashers import make_password
+
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
@@ -25,7 +30,7 @@ class RegisterView(APIView):
 
 class CustomUserViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
-    queryset = CustomUser.objects.all()
+    queryset = User.objects.all()
     serializer_class = CustomUserSerializer
 
     def get_queryset(self):
@@ -54,3 +59,19 @@ class LogoutView(APIView):
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
+
+class ResetPasswordView(APIView):
+    def post(self, request):
+        serializer = ResetPasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            new_password = serializer.validated_data['new_password']
+            
+            try:
+                user = User.objects.get(email=email)
+                user.password = make_password(new_password)  # Hash the new password
+                user.save()
+                return Response({"detail": "Password updated successfully."}, status=status.HTTP_200_OK)
+            except User.DoesNotExist:
+                return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

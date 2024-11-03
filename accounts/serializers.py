@@ -5,7 +5,7 @@ from .models import CustomUser, Profile
 class RegisterationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('email', 'password', 'username', 'first_name', 'last_name')
+        fields = ('email', 'password', 'username')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -13,8 +13,7 @@ class RegisterationSerializer(serializers.ModelSerializer):
             email=validated_data['email'],
             password=validated_data['password'],
             username=validated_data['username'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name']
+           
         )
         return user
 
@@ -29,3 +28,11 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = '__all__'
+class ResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    new_password = serializers.CharField(write_only=True)
+
+    def validate_email(self, value):
+        if not CustomUser.objects.filter(email=value).exists():
+            raise serializers.ValidationError("User with this email does not exist.")
+        return value        
