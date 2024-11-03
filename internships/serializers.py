@@ -37,8 +37,9 @@ class AnswerSerializer(serializers.ModelSerializer):
     applicant_name = serializers.CharField(source='applicant.username', read_only=True)
     mcq_question_text = serializers.CharField(source='mcq_question.text', read_only=True)
     desc_question_text = serializers.CharField(source='descriptive_question.text', read_only=True)
-    mcq_answer_text = serializers.CharField(source='mcq_answer.text', read_only=True)
+    # mcq_answer_text = serializers.CharField(source='mcq_answer.text', read_only=True)
     is_correct = serializers.SerializerMethodField()
+    print()
 
     class Meta:
         model = Answer
@@ -50,7 +51,7 @@ class AnswerSerializer(serializers.ModelSerializer):
             'descriptive_question',
             'desc_question_text', 
             'desc_answer',
-            'mcq_answer_text',  
+            'mcq_answer',  
             'review_status', 
             'admin_feedback',
             'is_correct'

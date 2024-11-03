@@ -204,8 +204,8 @@ class SubmitAnswersAPIView(APIView):
             else:
                 # Create a new answer
                 serializer = AnswerSerializer(data=answer_data)
-                
                 if serializer.is_valid():
+
                    serializer.save(applicant=user)
                 else:
                     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
