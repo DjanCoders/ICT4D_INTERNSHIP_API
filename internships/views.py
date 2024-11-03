@@ -172,6 +172,7 @@ class GetQuestionsAPIView(APIView):
 class SubmitAnswersAPIView(APIView):
     def post(self, request):
         answers_data = request.data
+        print(answers_data)
         user=request.user
         # Iterate through each answer submitted
         for answer_data in answers_data:
