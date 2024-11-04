@@ -5,13 +5,14 @@ from rest_framework.views import APIView
 from .serializers import (InternshipSerializer,
                            InternshipApplicationSerializer,
                              MCQQuestionSerializer, 
-                          DescriptiveQuestionSerializer,AnswerSerializer)
+                          DescriptiveQuestionSerializer,AnswerSerializer,
+                          TopScorerSerializer)
 from .models import( Internship, MCQQuestion, 
                     MCQQuestion,InternshipApplication,
                     Notification,DescQuestion,Answer)
 from .permissions import IsAdminOrReadOnly
 from django.http import JsonResponse
-from django.db.models import Count
+from django.db.models import Count,Q
 from django.db.models.functions import TruncMonth
 from datetime import datetime
 import calendar
@@ -268,3 +269,20 @@ class AnswerListView(APIView):
         serializer = AnswerSerializer(answer)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+class TopScorersAPIView(APIView):
+    def get(self, request):
+        top_scorers = (
+                    Answer.objects.filter(
+                    Q(review_status="APPROVED") & 
+                    (Q(mcq_answer__is_answer=True) | Q(desc_answer__isnull=False))
+                )
+                .values('applicant_id', 'applicant__username')
+                .annotate(
+                    score=Count('mcq_answer') + Count('desc_answer')
+                )
+                .order_by('-score')[:10]
+                  )
+        
+        # Serialize the data
+        serializer = TopScorerSerializer(top_scorers, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)    

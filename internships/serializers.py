@@ -60,6 +60,10 @@ class AnswerSerializer(serializers.ModelSerializer):
         # This method will automatically receive the model instance as a parameter
     def get_is_correct(self, obj):
         return obj.is_correct()
+class TopScorerSerializer(serializers.Serializer):
+    applicant_id = serializers.IntegerField()
+    applicant_name = serializers.CharField(source='applicant__username')
+    score = serializers.IntegerField()    
 
  
 class InternshipApplicationSerializer(serializers.ModelSerializer):

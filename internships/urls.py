@@ -11,6 +11,7 @@ from .views import (InternshipViewSet #ApplicationViewSet,
                      GetQuestionsAPIView,
                      SubmitAnswersAPIView,
                      AnswerListView,
+                     TopScorersAPIView,
                      )
 
 router = DefaultRouter()
@@ -32,6 +33,8 @@ urlpatterns = [
     path('submit-answers/',SubmitAnswersAPIView.as_view(), name="submit-answers"),
     path('review-answers/', AnswerListView.as_view(), name='review-answers'),
     path('review-answers/<int:pk>/', AnswerListView.as_view(), name='answer-detail'),
+    path('top-scorers/', TopScorersAPIView.as_view(), name='top-scorers'),
+
 
 
 
