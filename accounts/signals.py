@@ -11,3 +11,8 @@ def create_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=CustomUser)
 def save_profile(sender, instance, **kwargs):
     instance.profile.save()
+
+@receiver(post_save, sender=CustomUser)
+def update_profile_full_name(sender, instance, **kwargs):
+    if hasattr(instance, 'profile'):
+        instance.profile.save()
