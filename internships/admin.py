@@ -11,11 +11,11 @@ class OptionInline(admin.TabularInline):
     extra = 1  # Number of empty forms to display
 
 class MCQQuestionAdmin(admin.ModelAdmin):
-    list_display = ('text', 'question_type')
+    list_display = ('text','category')
     inlines = [OptionInline]
 
 class DescriptiveQuestionAdmin(admin.ModelAdmin):
-    list_display = ('text', 'short_answer')
+    list_display = ('text', 'short_answer','category')
 
 class AnswerAdmin(admin.ModelAdmin):
     list_display = (

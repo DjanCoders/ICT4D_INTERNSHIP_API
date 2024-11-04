@@ -144,36 +144,58 @@ class UnreadNotificationsView(APIView):
     def post(self, request):
         Notification.objects.filter(is_read=False).update(is_read=True)
         return Response({"id":1,"message": "Notifications marked as read."}, status=status.HTTP_200_OK)
-    
 class GetQuestionsAPIView(APIView):
-    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         data = []
 
-        # Ensure we are retrieving the full Internship objects, not just IDs
+        # Retrieve the internships the user has applied for
         applied_categories = Internship.objects.filter(
             internship__applicant=request.user
         ).distinct()
 
-        # Loop through each category to get associated questions
+        # Loop through each category to get unanswered questions
         for category in applied_categories:
-            
+            # Get answered MCQ question IDs
+            answered_mcq_ids = Answer.objects.filter(
+                applicant=request.user,
+                mcq_question__category=category,
+                mcq_answer__isnull=False
+            ).values_list('mcq_question_id', flat=True)
 
-            mcq_questions = MCQQuestion.objects.filter(category=category)
-            desc_questions = DescQuestion.objects.filter(category=category)
+            # Get unanswered MCQ questions
+            mcq_questions = MCQQuestion.objects.filter(
+                category=category
+            ).exclude(id__in=answered_mcq_ids)
 
+            # Get answered descriptive question IDs
+            answered_desc_ids = Answer.objects.filter(
+                applicant=request.user,
+                descriptive_question__category=category,
+                desc_answer__isnull=False
+            ).values_list('descriptive_question_id', flat=True)
+
+            # Get unanswered descriptive questions
+            desc_questions = DescQuestion.objects.filter(
+                category=category
+            ).exclude(id__in=answered_desc_ids)
+
+            # Serialize the questions
             mcq_serializer = MCQQuestionSerializer(mcq_questions, many=True)
-
             desc_serializer = DescriptiveQuestionSerializer(desc_questions, many=True)
+            if not mcq_serializer.data and not desc_serializer.data:
+                return data
 
-            # Add category information along with questions
+            # Add category information along with unanswered questions
             data.append({
-                "category_name": category.title,  # Ensure category.title is available
+                "category_name": category.title,
                 "mcq_questions": mcq_serializer.data,
                 "desc_questions": desc_serializer.data,
             })
+
         return Response(data)
+
        
 
 

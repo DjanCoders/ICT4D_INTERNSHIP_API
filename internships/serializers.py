@@ -37,7 +37,7 @@ class AnswerSerializer(serializers.ModelSerializer):
     applicant_name = serializers.CharField(source='applicant.username', read_only=True)
     mcq_question_text = serializers.CharField(source='mcq_question.text', read_only=True)
     desc_question_text = serializers.CharField(source='descriptive_question.text', read_only=True)
-    # mcq_answer_text = serializers.CharField(source='mcq_answer.text', read_only=True)
+    mcq_answer_text = serializers.CharField(source='mcq_answer.text', read_only=True)
     is_correct = serializers.SerializerMethodField()
     print()
 
@@ -54,7 +54,8 @@ class AnswerSerializer(serializers.ModelSerializer):
             'mcq_answer',  
             'review_status', 
             'admin_feedback',
-            'is_correct'
+            'is_correct',
+            'mcq_answer_text'
         ]
         # This method will automatically receive the model instance as a parameter
     def get_is_correct(self, obj):

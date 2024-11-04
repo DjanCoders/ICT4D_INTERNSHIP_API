@@ -5,7 +5,7 @@ from .models import InternshipApplication, Notification
 @receiver(post_save, sender=InternshipApplication)
 def create_notification_for_new_applicant(sender, instance, created, **kwargs):
     if created:
-        Notification.objects.create(message="A new applicant has applied.")
+        Notification.objects.create(message=f"A new applicant,  {instance}  has applied.")
 @receiver(post_delete, sender=InternshipApplication)
 def create_notification_for_deleted_applicant(sender, instance, **kwargs):
-    Notification.objects.create(message="An applicant's application has been deleted.")
+    Notification.objects.create(message=f"application for {instance }  has been deleted.")
