@@ -22,13 +22,18 @@ from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from django.utils import timezone
-
+from .signals  import  set_internship_active_status
 
 
 class InternshipViewSet(viewsets.ModelViewSet):
     queryset = Internship.objects.all()
     serializer_class = InternshipSerializer
     permission_classes = [IsAdminOrReadOnly]
+    def get_queryset(self):
+       set_internship_active_status()
+       if self.request.user.is_staff:
+          return Internship.objects.all()  
+       return Internship.objects.filter(is_active=True)
 class InternshipStatusUpdateView(generics.UpdateAPIView):
     queryset = Internship.objects.all()
     serializer_class = InternshipSerializer

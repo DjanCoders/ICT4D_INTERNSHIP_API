@@ -39,7 +39,7 @@ urlpatterns = [
     path('review-answers/<int:pk>/', AnswerListView.as_view(), name='answer-detail'),
     path('top-scorers/', TopScorersAPIView.as_view(), name='top-scorers'),
    
-   path('end_exam_duration/', end_exam_duration, name='end_exam_duration'),
+   path('end_exam_duration/<int:category_id>/', end_exam_duration, name='end_exam_duration'),
 
 
 

@@ -1,7 +1,9 @@
 from django.db import models
 from django.conf import settings
 from accounts.models import CustomUser
-
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from django.utils import timezone
 class Internship(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
@@ -14,6 +16,12 @@ class Internship(models.Model):
 
     def __str__(self):
         return self.title
+@receiver(pre_save, sender=Internship)
+def set_internship_active_status(sender, instance, **kwargs):
+    # Check if the end_date has passed before saving
+    if instance.end_date < timezone.now().date():
+        instance.is_active = False
+    
 
 class InternshipApplication(models.Model):
     applicant=models.ForeignKey(CustomUser,on_delete=models.CASCADE,related_name='application',null=True,blank=True)
