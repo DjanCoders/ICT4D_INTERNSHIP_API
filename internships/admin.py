@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from .models import Internship, InternshipApplication, MCQQuestion, DescQuestion, Option, Answer,Notification
+from .models import (Internship, InternshipApplication, MCQQuestion, 
+                     DescQuestion, Option, Answer,Notification,ExamSettings)
 admin.site.register(Notification)
 admin.site.register(Internship)
 class InternshipApplicationAdmin(admin.ModelAdmin):
@@ -16,6 +17,9 @@ class MCQQuestionAdmin(admin.ModelAdmin):
 
 class DescriptiveQuestionAdmin(admin.ModelAdmin):
     list_display = ('text', 'short_answer','category')
+class ExamSettingAdmin(admin.ModelAdmin):
+    model=ExamSettings
+    list_display=  ['category','start_time','duration']  
 
 class AnswerAdmin(admin.ModelAdmin):
     list_display = (
@@ -47,4 +51,5 @@ admin.site.register(DescQuestion, DescriptiveQuestionAdmin)
 admin.site.register(Option)
 admin.site.register(Answer, AnswerAdmin)
 admin.site.register(InternshipApplication,InternshipApplicationAdmin)
+admin.site.register(ExamSettings,ExamSettingAdmin)
 

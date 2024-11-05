@@ -12,6 +12,7 @@ from .views import (InternshipViewSet #ApplicationViewSet,
                      SubmitAnswersAPIView,
                      AnswerListView,
                      TopScorersAPIView,
+                     ExamSettingsViewSet,
                      )
 
 router = DefaultRouter()
@@ -19,6 +20,8 @@ router.register('internships', InternshipViewSet)
 router.register('internship-application', InternshipApplicationView)
 router.register('mcqquestions', MCQQuestionViewSet)
 router.register('shortanswerquestions', DescriptiveQuestionViewSet)
+router.register('exam-settings', ExamSettingsViewSet),
+
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -34,6 +37,7 @@ urlpatterns = [
     path('review-answers/', AnswerListView.as_view(), name='review-answers'),
     path('review-answers/<int:pk>/', AnswerListView.as_view(), name='answer-detail'),
     path('top-scorers/', TopScorersAPIView.as_view(), name='top-scorers'),
+
 
 
 

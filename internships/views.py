@@ -6,10 +6,10 @@ from .serializers import (InternshipSerializer,
                            InternshipApplicationSerializer,
                              MCQQuestionSerializer, 
                           DescriptiveQuestionSerializer,AnswerSerializer,
-                          TopScorerSerializer)
+                          TopScorerSerializer,ExamSettingsSerializer)
 from .models import( Internship, MCQQuestion, 
                     MCQQuestion,InternshipApplication,
-                    Notification,DescQuestion,Answer)
+                    Notification,DescQuestion,Answer,ExamSettings)
 from .permissions import IsAdminOrReadOnly
 from django.http import JsonResponse
 from django.db.models import Count,Q
@@ -18,6 +18,8 @@ from datetime import datetime
 import calendar
 from rest_framework.permissions import AllowAny
 from accounts.models import Profile
+from rest_framework.decorators import action
+
 
 class InternshipViewSet(viewsets.ModelViewSet):
     queryset = Internship.objects.all()
@@ -200,6 +202,15 @@ class GetQuestionsAPIView(APIView):
        
 
 
+class ExamSettingsViewSet(viewsets.ModelViewSet):
+    queryset = ExamSettings.objects.all()
+    serializer_class = ExamSettingsSerializer
+
+    @action(detail=False, methods=['get'], url_path='by-category/(?P<category_id>[^/.]+)')
+    def by_category(self, request, category_id=None):
+        settings = ExamSettings.objects.filter(category_id=category_id)
+        serializer = self.get_serializer(settings, many=True)
+        return Response(serializer.data)
       
         
 class SubmitAnswersAPIView(APIView):
