@@ -24,6 +24,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     user = CustomUserSerializer()
+    avatar = serializers.ImageField(required=False)
 
     class Meta:
         model = Profile
