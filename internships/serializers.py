@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from .models import Internship, Answer,InternshipApplication, MCQQuestion, DescQuestion, Option, Answer
+from .models import (Internship, Answer,InternshipApplication, 
+                     MCQQuestion, DescQuestion, Option, Answer,ExamSettings)
 
 class InternshipSerializer(serializers.ModelSerializer):
     class Meta:
@@ -75,3 +76,9 @@ class InternshipApplicationSerializer(serializers.ModelSerializer):
          model=InternshipApplication
          fields='__all__'
          extra_fields = ['internship_title','applicant_username']
+class ExamSettingsSerializer(serializers.ModelSerializer):
+    internship_title = serializers.ReadOnlyField(source='category.title')
+
+    class Meta:
+        model = ExamSettings
+        fields = ['id', 'category', 'start_time', 'duration','internship_title']

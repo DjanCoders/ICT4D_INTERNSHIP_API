@@ -100,3 +100,13 @@ class Notification(models.Model):
     created_at=models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return  self.message   
+from django.db import models
+
+class ExamSettings(models.Model):
+    category = models.OneToOneField(Internship, related_name='exam_settings', on_delete=models.CASCADE)
+    start_time = models.DateTimeField()
+    duration = models.IntegerField()  # Duration in minutes
+
+    def __str__(self):
+        return f"{self.category.title} - Exam starts at {self.start_time} for {self.duration} minutes"
+
