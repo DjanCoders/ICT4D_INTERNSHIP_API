@@ -85,12 +85,8 @@ WSGI_APPLICATION = 'internship.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'internshipdb',
-        'USER': 'root',
-        'PASSWORD': 'password',
-        'HOST': 'localhost',  # Use 'localhost' if connecting from the host machine
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / "db.sqlite3",  # This creates a SQLite database file in your project directory
     }
 }
 

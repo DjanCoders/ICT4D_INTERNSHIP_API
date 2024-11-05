@@ -19,6 +19,10 @@ import calendar
 from rest_framework.permissions import AllowAny
 from accounts.models import Profile
 from rest_framework.decorators import action
+from django.shortcuts import get_object_or_404
+from rest_framework.decorators import api_view
+from django.utils import timezone
+
 
 
 class InternshipViewSet(viewsets.ModelViewSet):
@@ -153,52 +157,59 @@ class GetQuestionsAPIView(APIView):
     def get(self, request):
         data = []
 
-        # Retrieve the internships the user has applied for
-        applied_categories = Internship.objects.filter(
-            internship__applicant=request.user
-        ).distinct()
+        # Retrieve the internship application for the current user
+        internship_application = InternshipApplication.objects.filter(
+            applicant=request.user
+        ).select_related('applly_for').first()
 
-        # Loop through each category to get unanswered questions
-        for category in applied_categories:
-            # Get answered MCQ question IDs
-            answered_mcq_ids = Answer.objects.filter(
-                applicant=request.user,
-                mcq_question__category=category,
-                mcq_answer__isnull=False
-            ).values_list('mcq_question_id', flat=True)
+        if not internship_application:
+            return Response({"detail": "No internship application found for this user."}, status=404)
 
-            # Get unanswered MCQ questions
-            mcq_questions = MCQQuestion.objects.filter(
-                category=category
-            ).exclude(id__in=answered_mcq_ids)
+        # Get the internship category
+        category = internship_application.applly_for
 
-            # Get answered descriptive question IDs
-            answered_desc_ids = Answer.objects.filter(
-                applicant=request.user,
-                descriptive_question__category=category,
-                desc_answer__isnull=False
-            ).values_list('descriptive_question_id', flat=True)
+        # Get ExamSettings for the category
+        exam_settings = get_object_or_404(ExamSettings, category=category)
+      
 
-            # Get unanswered descriptive questions
-            desc_questions = DescQuestion.objects.filter(
-                category=category
-            ).exclude(id__in=answered_desc_ids)
+        # Get IDs of answered MCQ questions for this user and category
+        answered_mcq_ids = Answer.objects.filter(
+            applicant=request.user,
+            mcq_question__category=category,
+            mcq_answer__isnull=False
+        ).values_list('mcq_question_id', flat=True)
 
-            # Serialize the questions
-            mcq_serializer = MCQQuestionSerializer(mcq_questions, many=True)
-            desc_serializer = DescriptiveQuestionSerializer(desc_questions, many=True)
-            if not mcq_serializer.data and not desc_serializer.data:
-                return data
+        # Get unanswered MCQ questions
+        mcq_questions = MCQQuestion.objects.filter(
+            category=category
+        ).exclude(id__in=answered_mcq_ids)
 
-            # Add category information along with unanswered questions
-            data.append({
-                "category_name": category.title,
-                "mcq_questions": mcq_serializer.data,
-                "desc_questions": desc_serializer.data,
-            })
+        # Get IDs of answered descriptive questions for this user and category
+        answered_desc_ids = Answer.objects.filter(
+            applicant=request.user,
+            descriptive_question__category=category,
+            desc_answer__isnull=False
+        ).values_list('descriptive_question_id', flat=True)
+
+        # Get unanswered descriptive questions
+        desc_questions = DescQuestion.objects.filter(
+            category=category
+        ).exclude(id__in=answered_desc_ids)
+
+        # Serialize the questions
+        mcq_serializer = MCQQuestionSerializer(mcq_questions, many=True)
+        desc_serializer = DescriptiveQuestionSerializer(desc_questions, many=True)
+        
+      # Add category information with unanswered questions and exam duration
+        data.append({
+            "category_name": category.title,
+            "mcq_questions": mcq_serializer.data,
+            "desc_questions": desc_serializer.data,
+            "exam_duration": exam_settings.duration,  # Duration in minutes
+            "start_time": exam_settings.start_time.strftime("%Y-%m-%d %H:%M:%S")  # Start time formatted
+        })
 
         return Response(data)
-
        
 
 
@@ -211,7 +222,22 @@ class ExamSettingsViewSet(viewsets.ModelViewSet):
         settings = ExamSettings.objects.filter(category_id=category_id)
         serializer = self.get_serializer(settings, many=True)
         return Response(serializer.data)
-      
+@api_view(['POST'])
+def end_exam_duration(request):
+    
+        internship_application = InternshipApplication.objects.filter(
+            applicant=request.user
+        ).select_related('applly_for').first()
+
+       
+
+        # Get the internship category
+        category = internship_application.applly_for        
+        exam_settings = ExamSettings.objects.get(category=category)
+        # Set the duration to 0
+        exam_settings.duration = 0
+        exam_settings.save()
+            
         
 class SubmitAnswersAPIView(APIView):
     def post(self, request):

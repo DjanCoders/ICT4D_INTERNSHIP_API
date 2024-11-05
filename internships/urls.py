@@ -13,6 +13,7 @@ from .views import (InternshipViewSet #ApplicationViewSet,
                      AnswerListView,
                      TopScorersAPIView,
                      ExamSettingsViewSet,
+                     end_exam_duration
                      )
 
 router = DefaultRouter()
@@ -37,6 +38,8 @@ urlpatterns = [
     path('review-answers/', AnswerListView.as_view(), name='review-answers'),
     path('review-answers/<int:pk>/', AnswerListView.as_view(), name='answer-detail'),
     path('top-scorers/', TopScorersAPIView.as_view(), name='top-scorers'),
+   
+   path('end_exam_duration/', end_exam_duration, name='end_exam_duration'),
 
 
 

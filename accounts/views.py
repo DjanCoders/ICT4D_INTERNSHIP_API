@@ -37,7 +37,7 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         return self.queryset.filter(id=self.request.user.id)
 
 class ProfileViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated, IsOwner]
+    permission_classes = [AllowAny]
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
 
