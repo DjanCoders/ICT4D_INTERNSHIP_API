@@ -29,7 +29,7 @@ class RegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CustomUserViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [AllowAny]
     queryset = User.objects.all()
     serializer_class = CustomUserSerializer
 
