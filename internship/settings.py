@@ -29,8 +29,20 @@ SECRET_KEY = 'django-insecure-or88ils!lf+9l7l17623+n!1m#sn%kt7vmz+2ns#22vdw902y@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["" 
+"ict4d-internship-api.onrender.com"
+                 ,'localhost',
+                  '127.0.0.1'
+                  ,
+                  'internship-portal-wt9o.onrender.com'
+                 ]
+CORS_ALLOWED_ORIGINS = [
+    'https://internship-portal-wt9o.onrender.com',
+]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://internship-portal-wt9o.onrender.com',
+]
 
 # Application definition
 
@@ -53,6 +65,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
