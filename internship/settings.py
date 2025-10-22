@@ -37,8 +37,10 @@ ALLOWED_HOSTS = [""
                   'internship-portal-wt9o.onrender.com'
                  ]
 CORS_ALLOWED_ORIGINS = [
-    'https://internship-portal-wt9o.onrender.com',
+    "https://internship-portal-wt9o.onrender.com",  # production frontend
+    "http://localhost:5173",                        # local dev frontend
 ]
+
 
 CSRF_TRUSTED_ORIGINS = [
     'https://internship-portal-wt9o.onrender.com',
@@ -64,6 +66,8 @@ INSTALLED_APPS = [
 
 
 MIDDLEWARE = [
+        'corsheaders.middleware.CorsMiddleware',
+
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -72,7 +76,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'internship.urls'
@@ -181,9 +184,5 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',
-    # 'http://localhost:5432',
 
-]
 
