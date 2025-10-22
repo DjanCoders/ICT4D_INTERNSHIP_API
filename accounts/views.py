@@ -37,15 +37,19 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         return self.queryset.filter(id=self.request.user.id)
 
 class ProfileViewSet(viewsets.ModelViewSet):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
 
     def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
+        user = self.request.user
+        if not user.is_authenticated:
+            return Profile.objects.none()
+        return self.queryset.filter(user=user)
     
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
 
 class LogoutView(APIView):
     permission_classes = (IsAuthenticated,)

@@ -40,7 +40,6 @@ class AnswerSerializer(serializers.ModelSerializer):
     desc_question_text = serializers.CharField(source='descriptive_question.text', read_only=True)
     mcq_answer_text = serializers.CharField(source='mcq_answer.text', read_only=True)
     is_correct = serializers.SerializerMethodField()
-    print()
 
     class Meta:
         model = Answer
